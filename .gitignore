@@ -5,3 +5,6 @@ bin/
 Makefile
 _CPack_Packages/
 install_manifest.txt
+Testing
+_deps/
+lib/
