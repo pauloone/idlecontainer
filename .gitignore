@@ -3,3 +3,5 @@ CMakeFiles/
 bin/
 *.cmake
 Makefile
+_CPack_Packages/
+install_manifest.txt
