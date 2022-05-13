@@ -10,8 +10,8 @@ option(WITH_COV "Build tests with coverage" OFF)
 # Internal compiler options
 #============================================================================
 set (CXX_VERSION -std=c++20)
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -fconcepts-ts")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -fconcepts-ts")
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -fconcepts")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -fconcepts")
 
 
 
