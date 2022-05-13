@@ -1,13 +1,13 @@
 #include <iostream>
 #include <exception>
 #include "docopt.h"
-#include "docker_client.h"
+#include "container_manager.h"
 
 static const char USAGE[] =
 R"(IDLEContainer
 
     Usage:
-      idlecontainer [--docker-socket=<path>] trottle <container_id> <throtle_value>
+      idlecontainer [--docker-socket=<path>] trottle <container_name> <throtle_value>
 
     Options:
       -h --help                     Show this screen.
@@ -22,8 +22,13 @@ int main(int argc, const char** argv)
                              true,
                              "IdleContainer 0.0");
 
-        auto docker_client = DockerClient(args.at("--docker-socket").asString());
-        docker_client.update_container(args.at("<container_id>").asString());
+        auto container_manager = ContainerManager(args.at("--docker-socket").asString());
+        auto running_containers = container_manager.running_containers();
+        auto container_id = running_containers.find(args.at("<container_name>").asString());
+        if (container_id == running_containers.end()){
+            std::cout << "Container not found: " << args.at("<container_name>").asString() << std::endl;
+            return 2;
+        }
         return 0;
     } catch (std::exception& e) {
       std::cout << "Exception occured: " << e.what() << std::endl;

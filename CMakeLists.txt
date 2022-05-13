@@ -9,9 +9,9 @@ option(WITH_COV "Build tests with coverage" OFF)
 #============================================================================
 # Internal compiler options
 #============================================================================
-set (CXX_VERSION -std=c++17)
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set (CXX_VERSION -std=c++20)
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -fconcepts-ts")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -fconcepts-ts")
 
 
 
@@ -26,7 +26,10 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 #============================================================================
 include_directories(libraries/docopt)
 set (LIBRARIES_SRC libraries/docopt/docopt.cpp)
+
 include (FindCURL)
+
+include_directories(libraries/nlohmann_json/include)
 
 #============================================================================
 # Targets

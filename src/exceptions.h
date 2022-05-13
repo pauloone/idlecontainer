@@ -1,3 +1,6 @@
+#ifndef INCLUDE_PAULONNE_IDLECONTAINER_EXCEPTION_HPP_
+#define INCLUDE_PAULONNE_IDLECONTAINER_EXCEPTION_HPP_
+
 #include <exception>
 #include <string>
 #include "curl/curl.h"
@@ -19,3 +22,5 @@ class CURLException: public std::exception {
 	private:
 		std::string message;
 };
+
+#endif  // INCLUDE_PAULONNE_IDLECONTAINER_EXCEPTION_HPP_

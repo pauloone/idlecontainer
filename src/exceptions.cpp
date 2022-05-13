@@ -1,4 +1,4 @@
-#include "docker_exception.h"
+#include "exceptions.h"
 
 DockerException::DockerException(const std::string &message) : message(message){}
 
