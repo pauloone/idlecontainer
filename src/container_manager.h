@@ -6,12 +6,14 @@
 #include <nlohmann/json.hpp>
 #include <map>
 #include <vector>
+#include <cstdint>
 
 class ContainerManager{
 	public:
 		ContainerManager(const std::string &host);
 		std::map<std::string, std::string> running_containers();
 		void add_container(const std::string &container_id);
+		void throttle(const int_fast64_t &cpu_period);
 
 	private:
 		std::string uri;

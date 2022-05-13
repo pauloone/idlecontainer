@@ -40,6 +40,14 @@ ContainerManager::ContainerManager(const std::string &host) : containers_to_thro
 	// Generic default callback. Curl response will be written into this->curl_response.
 	curl_easy_set_opterr(CURLOPT_WRITEFUNCTION, &ContainerManager::write);
 	curl_easy_set_opterr(CURLOPT_WRITEDATA, &(this->curl_response));
+
+	// We raise an exception on error
+	curl_easy_set_opterr(CURLOPT_FAILONERROR, 1L);
+
+	// We set the content-type to application/json
+	struct curl_slist *hs=NULL;
+	hs = curl_slist_append(hs, "Content-Type: application/json");
+	curl_easy_set_opterr(CURLOPT_HTTPHEADER, hs);
 }
 
 std::map<std::string, std::string> ContainerManager::running_containers(){
@@ -51,6 +59,7 @@ std::map<std::string, std::string> ContainerManager::running_containers(){
 	// We make the query
 	std::string const url = this->uri + "/containers/json";
 	curl_easy_set_opterr(CURLOPT_URL, url.c_str());
+	curl_easy_set_opterr(CURLOPT_POST, 0L);
 	auto const res = curl_easy_perform(this->easy_handle);
 	if(res != CURLE_OK){
 		throw CURLException(res, this->errbuf);
@@ -75,7 +84,26 @@ std::map<std::string, std::string> ContainerManager::running_containers(){
 
 void ContainerManager::add_container(const std::string &container_id){
 	//We add the url so we don't have to concatenate the url all the time;
-	this->containers_to_throttle.insert(this->containers_to_throttle.end(), this->uri + "/containers/" + container_id + "/update");
+	this->containers_to_throttle.push_back(this->uri + "/containers/" + container_id + "/update");
+	std::cout << "Container added" << std::endl;
+}
+
+void ContainerManager::throttle(const int_fast64_t &cpu_period){
+	/*throttle all monitored containers to the specified cpu_period. The cpu_quota is set to 1000 microseconds
+	*/
+    curl_easy_set_opterr(CURLOPT_POSTFIELDSIZE, -1L);
+	//We don't use the json library to minimize cost
+	std::string data = "{\"CpuPeriod\":" + std::to_string(cpu_period) + ",\"CpuQuota\":1000}";
+	curl_easy_set_opterr(CURLOPT_POSTFIELDS, data.c_str());
+
+	for(auto const& container : this->containers_to_throttle){
+		curl_easy_set_opterr(CURLOPT_URL, container.c_str());
+		std::cout << "throttle" << std::endl;
+		auto const res = curl_easy_perform(this->easy_handle);
+		if(res != CURLE_OK){
+			throw CURLException(res, this->errbuf);
+		}
+	}
 }
 
 void ContainerManager::curl_easy_set_opterr(CURLoption option, auto parameter) {

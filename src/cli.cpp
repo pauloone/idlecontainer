@@ -29,6 +29,8 @@ int main(int argc, const char** argv)
             std::cout << "Container not found: " << args.at("<container_name>").asString() << std::endl;
             return 2;
         }
+        container_manager.add_container(container_id->second);
+        container_manager.throttle(100000);
         return 0;
     } catch (std::exception& e) {
       std::cout << "Exception occured: " << e.what() << std::endl;
