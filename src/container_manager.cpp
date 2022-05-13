@@ -85,20 +85,18 @@ std::map<std::string, std::string> ContainerManager::running_containers(){
 void ContainerManager::add_container(const std::string &container_id){
 	//We add the url so we don't have to concatenate the url all the time;
 	this->containers_to_throttle.push_back(this->uri + "/containers/" + container_id + "/update");
-	std::cout << "Container added" << std::endl;
 }
 
-void ContainerManager::throttle(const int_fast64_t &cpu_period){
+void ContainerManager::throttle(const int_fast64_t &cpu_period, const int_fast64_t &cpu_quota){
 	/*throttle all monitored containers to the specified cpu_period. The cpu_quota is set to 1000 microseconds
 	*/
     curl_easy_set_opterr(CURLOPT_POSTFIELDSIZE, -1L);
 	//We don't use the json library to minimize cost
-	std::string data = "{\"CpuPeriod\":" + std::to_string(cpu_period) + ",\"CpuQuota\":1000}";
+	std::string data = "{\"CpuPeriod\":" + std::to_string(cpu_period) + ",\"CpuQuota\":" + std::to_string(cpu_quota) + "}";
 	curl_easy_set_opterr(CURLOPT_POSTFIELDS, data.c_str());
 
 	for(auto const& container : this->containers_to_throttle){
 		curl_easy_set_opterr(CURLOPT_URL, container.c_str());
-		std::cout << "throttle" << std::endl;
 		auto const res = curl_easy_perform(this->easy_handle);
 		if(res != CURLE_OK){
 			throw CURLException(res, this->errbuf);
