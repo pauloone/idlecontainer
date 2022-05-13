@@ -1,3 +1,6 @@
 [submodule "libraries/docopt"]
 	path = libraries/docopt
 	url = git@github.com:docopt/docopt.cpp.git
+[submodule "libraries/nlohmann_json"]
+	path = libraries/nlohmann_json
+	url = git@github.com:nlohmann/json.git

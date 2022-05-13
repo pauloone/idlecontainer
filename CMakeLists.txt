@@ -10,6 +10,8 @@ option(WITH_COV "Build tests with coverage" OFF)
 # Internal compiler options
 #============================================================================
 set (CXX_VERSION -std=c++17)
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
 
@@ -24,11 +26,24 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 #============================================================================
 include_directories(libraries/docopt)
 set (LIBRARIES_SRC libraries/docopt/docopt.cpp)
+include (FindCURL)
 
 #============================================================================
 # Targets
 #============================================================================
-add_executable(IDLEContainer src/cli.cpp ${LIBRARIES_SRC})
+
+file (GLOB_RECURSE SOURCES "src/*.cpp")
+
+add_executable(IDLEContainer ${SOURCES} ${LIBRARIES_SRC})
+
+target_link_libraries(
+  IDLEContainer
+  ${CURL_LIBRARIES}
+)
+
+#============================================================================
+# Install
+#============================================================================
 
 install(TARGETS IDLEContainer)
 
@@ -77,7 +92,7 @@ target_link_libraries(
   gtest_main
   gcov
 )
-target_compile_options (tests PUBLIC -fprofile-arcs -ftest-coverage -DUNITTESTS=True)
+target_compile_options (tests PUBLIC -O0 -fprofile-arcs -ftest-coverage -DUNITTESTS=True)
 
 include(GoogleTest)
 gtest_discover_tests(tests)

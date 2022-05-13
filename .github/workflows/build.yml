@@ -21,8 +21,11 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Install cURL Headers
+      run: sudo apt-get install libcurl4-openssl-dev
+
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}
+      run: cmake -DCMAKE_BUILD_TYPE=RELEASE -B ${{github.workspace}}
 
     - name: Build
       # Build your program with the given configuration
