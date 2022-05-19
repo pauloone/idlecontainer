@@ -12,15 +12,17 @@ static const char USAGE[] =
 R"(IDLEContainer
 
     Usage:
-      idlecontainer [--docker-socket=<path>] throttle <container_name> <throtle_value>
+      idlecontainer [options] throttle <container_name> <throttle_value>
 
     Options:
       -h --help                     Show this screen.
-      -s --docker-socket=<path>     [default: unix:///var/run/docker.sock]
+      -s --docker-socket=<path>     The path to the docker socket [default: unix:///var/run/docker.sock]
+      -m --metrics                  Display the cpu usage and command in stdout, separated with commas.
 )";
 
-const float KP = 0.1;     // P coefficient of the cpu usage control PID
-const float KI = KP/10;    // I coefficient of the cpu usage control PID
+const float KP = 0.8;      // P coefficient of the cpu usage control PID
+const float KI = 0.1;    // I coefficient of the cpu usage control PID
+
 const float MAX_INTEGRAL = 1.2 * ContainerManager::MAX_PERIOD_US / (1000 * KI); // The integral is saturated according to the maximum command (integral * KI can achieve 1.2 time the max command)
 
 int main(int argc, const char** argv)
@@ -33,10 +35,19 @@ int main(int argc, const char** argv)
 
         auto procstat = ProcStat();
         auto number_of_processors = sysconf(_SC_NPROCESSORS_ONLN);
-        const float target = std::stof(args.at("<throtle_value>").asString());
+        float target_tmp; // We need to temporary use a non const value because of try catch
+        try {
+            target_tmp = std::stof(args.at("<throttle_value>").asString());
+        } catch (std::exception& e) {
+          std::cout << "throttle_value should be a float" << std::endl;
+          return 100;
+        }
+        const float target = target_tmp;
+
         const uint_fast64_t cpu_quota = number_of_processors * 1000; // the container will run 1000 per period per cycle
         auto container_manager = ContainerManager(args.at("--docker-socket").asString(), cpu_quota);
         const float min_container_usage = 1000.0f / ContainerManager::MAX_PERIOD_US;
+        bool metrics = args.at("--metrics").asBool();
 
         auto running_containers = container_manager.running_containers();
         auto container_id = running_containers.find(args.at("<container_name>").asString());
@@ -53,6 +64,10 @@ int main(int argc, const char** argv)
         auto new_idle = last_idle;
         uint_fast64_t cpu_period = 100000;
         float integral = 0.0;
+
+        if(metrics){
+            std::cout << "CPU Usage" << "," << "Command" << std::endl;
+        }
 
         while(true){
             usleep(cpu_period);
@@ -74,6 +89,9 @@ int main(int argc, const char** argv)
             container_manager.throttle(cpu_period);
             last_tick = new_tick;
             last_idle = new_idle;
+            if(metrics){
+                std::cout << std::to_string(cpu_usage) << "," << std::to_string(command) << std::endl;
+            }
 
         }
 
