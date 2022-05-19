@@ -11,7 +11,7 @@ class ProcStat{
 
 	private:
 		std::ifstream filestat;
-		uint_fast64_t ratio_to_ms;
+		const uint_fast64_t ratio_to_ms;
 
 };
 
