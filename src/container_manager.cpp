@@ -1,9 +1,13 @@
 #include "container_manager.h"
 #include "exceptions.h"
+#include <stdio.h>
 
 using json = nlohmann::json;
 
-ContainerManager::ContainerManager(const std::string &host) : containers_to_throttle() {
+ContainerManager::ContainerManager(const std::string &host, const uint_fast64_t &cpu_quota) : containers_to_throttle(),
+																							  cpu_throttle_format((JSON_CPU_THROTTLE_START + std::to_string(cpu_quota) + JSON_CPU_THROTTLE_END)),
+																							  format_buffer_len(cpu_throttle_format.length() + std::to_string(MAX_PERIOD_US).length() + 1),
+																							  format_buffer(new char[format_buffer_len]) {
 	/*
 		Initialise the docker client and it's internal curl handler.
 	*/
@@ -87,13 +91,13 @@ void ContainerManager::add_container(const std::string &container_id){
 	this->containers_to_throttle.push_back(this->uri + "/containers/" + container_id + "/update");
 }
 
-void ContainerManager::throttle(const int_fast64_t &cpu_period, const int_fast64_t &cpu_quota){
+void ContainerManager::throttle(const int_fast64_t &cpu_period){
 	/*throttle all monitored containers to the specified cpu_period. The cpu_quota is set to 1000 microseconds
 	*/
     curl_easy_set_opterr(CURLOPT_POSTFIELDSIZE, -1L);
 	//We don't use the json library to minimize cost
-	std::string data = "{\"CpuPeriod\":" + std::to_string(cpu_period) + ",\"CpuQuota\":" + std::to_string(cpu_quota) + "}";
-	curl_easy_set_opterr(CURLOPT_POSTFIELDS, data.c_str());
+	snprintf(format_buffer, format_buffer_len, cpu_throttle_format.c_str(), cpu_period);
+	curl_easy_set_opterr(CURLOPT_POSTFIELDS, format_buffer);
 
 	for(auto const& container : this->containers_to_throttle){
 		curl_easy_set_opterr(CURLOPT_URL, container.c_str());

@@ -9,9 +9,9 @@ option(WITH_COV "Build tests with coverage" OFF)
 #============================================================================
 # Internal compiler options
 #============================================================================
-set (CXX_VERSION -std=c++20)
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -fconcepts")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -fconcepts")
+set (CMAKE_CXX_FLAGS_DEBUG "-O0 -fconcepts")
+set (CMAKE_CXX_FLAGS_RELEASE "-O3 -fconcepts")
+set (CMAKE_VERBOSE_MAKEFILE 1)
 
 
 
@@ -38,6 +38,7 @@ include_directories(libraries/nlohmann_json/include)
 file (GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(IDLEContainer ${SOURCES} ${LIBRARIES_SRC})
+set_property(TARGET IDLEContainer PROPERTY CXX_STANDARD 20)
 
 target_link_libraries(
   IDLEContainer
@@ -96,6 +97,7 @@ target_link_libraries(
   gcov
 )
 target_compile_options (tests PUBLIC -O0 -fprofile-arcs -ftest-coverage -DUNITTESTS=True)
+set_property(TARGET tests PROPERTY CXX_STANDARD 20)
 
 include(GoogleTest)
 gtest_discover_tests(tests)

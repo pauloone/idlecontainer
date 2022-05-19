@@ -26,11 +26,11 @@ int main(int argc, const char** argv)
                              true,
                              "IdleContainer 0.0");
 
-        auto container_manager = ContainerManager(args.at("--docker-socket").asString());
         auto procstat = ProcStat();
         auto number_of_processors = sysconf(_SC_NPROCESSORS_ONLN);
         const float target = std::stof(args.at("<throtle_value>").asString());
         const uint_fast64_t cpu_quota = number_of_processors * 1000; // the container will run 1000 per period per cycle
+        auto container_manager = ContainerManager(args.at("--docker-socket").asString(), cpu_quota);
 
         auto running_containers = container_manager.running_containers();
         auto container_id = running_containers.find(args.at("<container_name>").asString());
@@ -57,7 +57,7 @@ int main(int argc, const char** argv)
                 container_usage = 0.001; //We limit the period to 1s max
             }
             cpu_period = (uint_fast64_t) (1000.0 / container_usage);
-            container_manager.throttle(cpu_period, cpu_quota);
+            container_manager.throttle(cpu_period);
             last_tick = new_tick;
             last_idle = new_idle;
 
