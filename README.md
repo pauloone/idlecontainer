@@ -10,5 +10,7 @@ The use of container technology allow to use unused server CPU resources for non
 
 # Version
 
+| Version | Description															          |
+| ------- | ----------------------------------------------------------------------------- |
 | 0.0.1   | First basic version, that allow very simple throttling of a container by name |
 | 1.0.0   | Initial version, supporting throttling a lone container with simple PID.      |
