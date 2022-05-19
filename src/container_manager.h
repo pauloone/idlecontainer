@@ -16,7 +16,7 @@ class ContainerManager{
 		void throttle(const int_fast64_t &cpu_period);
 
 		//constantes
-		static const uint_fast64_t MAX_PERIOD_US = 1000000;
+		static const uint_fast64_t MAX_PERIOD_US = 1000000; 
 
 	private:
 		std::string uri;
